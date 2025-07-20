@@ -1,6 +1,9 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const API_KEY = 'AIzaSyCzGFFERE2nP8zApZLfTvRUpTQ0v6VlHqg';
+// Sample .env file:
+// VITE_GOOGLE_API_KEY=your-google-api-key-here
+
+const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY as string;
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({
   model: 'gemini-2.5-flash-lite-preview-06-17',
