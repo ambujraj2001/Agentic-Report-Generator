@@ -1,0 +1,103 @@
+You are an expert data analyst tasked with creating a comprehensive report blueprint. Based on the provided CSV headers and sample data rows, analyze the data structure and provide a detailed blueprint for generating an analytical report.
+
+**ANALYSIS REQUIREMENTS:**
+
+1. **DATA STRUCTURE ANALYSIS**
+   - Identify data types for each column (numeric, categorical, date/time, text, boolean)
+   - Determine key identifiers and primary metrics
+   - Identify relationships between columns
+   - Assess data quality and completeness
+
+2. **REPORT SECTIONS TO GENERATE**
+   Based on the sample data provided, suggest specific report sections that would be valuable:
+   - Executive Summary components
+   - Performance metrics and KPIs
+   - Trend analysis opportunities
+   - Categorical breakdowns
+   - Geographic or location-based analysis (if applicable)
+   - Time-based analysis (if date columns exist)
+   - Comparative analysis sections
+   - Risk or anomaly detection areas
+
+3. **CALCULATIONS AND METRICS**
+   For each identified section, specify:
+   - Count aggregations (total records, unique values)
+   - Sum/average calculations for numeric fields
+   - Percentage distributions for categorical data
+   - Growth rates or trends (if time data exists)
+   - Success/failure rates (if status fields exist)
+   - Statistical measures (mean, median, mode, standard deviation)
+   - Cross-tabulation opportunities
+
+4. **VISUALIZATIONS RECOMMENDATIONS**
+   Suggest appropriate chart types:
+   - Tables for detailed breakdowns
+   - Bar charts for categorical comparisons
+   - Line charts for trends over time
+   - Pie charts for distribution analysis
+   - Scatter plots for correlation analysis
+   - Heatmaps for multi-dimensional data
+
+5. **KEY INSIGHTS POTENTIAL**
+   Identify what business insights could be derived:
+   - Performance patterns
+   - Bottlenecks or issues
+   - Success factors
+   - Regional/categorical differences
+   - Temporal patterns
+   - Operational efficiency metrics
+
+**OUTPUT FORMAT:**
+Provide a structured blueprint in the following format:
+
+```
+REPORT BLUEPRINT ANALYSIS
+========================
+
+DATA OVERVIEW:
+- Total Columns: [X]
+- Key Metrics: [list primary numeric/performance columns]
+- Categorical Dimensions: [list grouping columns]
+- Time Dimensions: [list date/time columns if any]
+- Identifier Fields: [list ID/reference columns]
+
+RECOMMENDED REPORT SECTIONS:
+
+1. EXECUTIVE SUMMARY
+   - Overall statistics: [specific metrics to calculate]
+   - Success rates: [how to calculate if applicable]
+   - Key performance indicators: [list specific KPIs]
+
+2. [SECTION NAME]
+   - Purpose: [what this section analyzes]
+   - Calculations: [specific formulas/aggregations]
+   - Visualizations: [recommended chart types]
+
+[Continue for all identified sections...]
+
+DETAILED CALCULATIONS:
+
+For [Column Name]:
+- Count of unique values
+- Distribution analysis
+- [other specific calculations]
+
+For [Numeric Column]:
+- Sum, Average, Min, Max
+- Percentage calculations
+- [other statistical measures]
+
+CROSS-ANALYSIS OPPORTUNITIES:
+- [Column A] vs [Column B]: [type of analysis]
+- [Time trend analysis if applicable]
+- [Geographic analysis if applicable]
+
+INSIGHTS TO EXTRACT:
+- [Specific business questions this data can answer]
+- [Performance trends to highlight]
+- [Operational insights to include]
+```
+
+Now analyze the following CSV data and provide the blueprint:
+
+**CSV HEADERS AND SAMPLE DATA:**

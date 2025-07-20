@@ -1,0 +1,27 @@
+# Sample Data Analysis Report Template
+
+This is a sample text file that will be read by the util function to generate reports.
+
+## Report Guidelines:
+- Analyze the provided CSV data thoroughly
+- Identify key patterns and trends
+- Provide actionable insights
+- Include statistical summaries
+- Highlight any anomalies or outliers
+
+## Data Analysis Instructions:
+1. Review the column headers and data types
+2. Calculate basic statistics (mean, median, mode, standard deviation)
+3. Identify correlations between variables
+4. Look for patterns in the top 5 rows
+5. Provide recommendations based on the data structure
+
+## Report Structure:
+- Executive Summary
+- Data Overview
+- Key Findings
+- Recommendations
+- Technical Details
+
+Please use this template to generate a comprehensive analysis report for the uploaded CSV data. 
+Give me PLain html with inline css as plain text only
