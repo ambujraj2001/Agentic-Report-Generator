@@ -1,69 +1,95 @@
-# React + TypeScript + Vite
+# Agentic Report Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Upload a CSV file and get a comprehensive, executive-ready HTML report — powered by an LLM that writes its own SQL queries, executes them against your full dataset in the browser, and builds the report from real computed results.
 
-Currently, two official plugins are available:
+## How It Works
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The app uses a 3-step agentic pipeline:
 
-## Expanding the ESLint configuration
+```
+Step 1: LLM sees column headers + 5 sample rows
+        → Generates a report blueprint + SQL queries
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Step 2: AlaSQL runs those SQL queries on the FULL dataset (in-browser, instant)
+        → Returns precise aggregations, breakdowns, and metrics
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Step 3: LLM receives the blueprint + query results
+        → Generates a complete, self-contained HTML report
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+This approach means the LLM decides **what** to analyze (by writing SQL), while the actual number-crunching happens locally on all your data — no approximations, no sampling.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Tech Stack
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **React 19** + **TypeScript** — UI framework
+- **Vite 5** — Build tool
+- **Tailwind CSS 4** — Styling (dark theme)
+- **AlaSQL** — In-browser SQL engine for running queries on CSV data
+- **PapaParse** — CSV parsing
+- **Hugging Face Inference API** — LLM provider (Qwen 2.5 Coder 32B)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- A Hugging Face API key ([get one here](https://huggingface.co/settings/tokens))
+
+### Setup
+
+```bash
+git clone https://github.com/ambujraj2001/agentic-report-generator.git
+cd agentic-report-generator
+npm install
 ```
+
+Create a `.env` file in the root directory:
+
+```env
+VITE_HF_API_BASE=https://router.huggingface.co/v1
+VITE_HF_MODEL=Qwen/Qwen2.5-Coder-32B-Instruct
+VITE_HF_API_KEY=your_huggingface_api_key_here
+```
+
+### Run
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:5173` in your browser.
+
+### Build
+
+```bash
+npm run build
+npm run preview
+```
+
+## Usage
+
+1. **Upload** — Drag and drop a CSV file (or click to browse)
+2. **Generate** — Click "Generate Report" — the app will plan the analysis, run SQL queries, and build the report
+3. **Export** — Preview the report in-app, download as `.html`, or copy the HTML to clipboard
+
+## Project Structure
+
+```
+src/
+├── App.tsx                          # Main layout (3-column dashboard)
+├── index.css                        # Tailwind imports + custom utilities
+├── main.tsx                         # Entry point
+└── components/
+    ├── CSVUpload.tsx                 # Drag-and-drop CSV upload
+    ├── ReportGenerator.tsx           # Orchestrates the 3-step pipeline
+    ├── HTMLDownloader.tsx            # Preview, download, and copy report
+    └── util.ts                      # LLM calls, AlaSQL execution, pipeline logic
+
+public/
+├── generateReportBlueprint.txt      # Prompt template: blueprint + SQL generation
+└── reportGenerator.txt              # Prompt template: HTML report generation
+```
+
+## Configuration
+
+You can swap the LLM model by changing `VITE_HF_MODEL` in `.env`. Any model available on the [Hugging Face Inference API](https://huggingface.co/inference/models) that supports the OpenAI-compatible chat completions endpoint will work. Code-specialized models (like Qwen Coder) tend to produce better HTML output.

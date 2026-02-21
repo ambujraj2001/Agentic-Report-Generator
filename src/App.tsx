@@ -13,12 +13,12 @@ const App: React.FC = () => {
 
   const handleCSVUpload = useCallback(
     (
-      parsedData: Papa.ParseResult<Record<string, string>>,
+      data: Papa.ParseResult<Record<string, string>>,
       uploadedFileName: string
     ) => {
-      setParsedData(parsedData);
+      setParsedData(data);
       setFileName(uploadedFileName);
-      setHtmlReport(''); // Reset report when new CSV is uploaded
+      setHtmlReport('');
     },
     []
   );
@@ -28,123 +28,114 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="app-container">
-      <div className="app-header">
-        <div className="app-logo">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-            <rect
-              x="3"
-              y="4"
-              width="18"
-              height="18"
-              rx="2"
-              ry="2"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-            <line
-              x1="16"
-              y1="2"
-              x2="16"
-              y2="6"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-            <line
-              x1="8"
-              y1="2"
-              x2="8"
-              y2="6"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-            <line
-              x1="3"
-              y1="10"
-              x2="21"
-              y2="10"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-          </svg>
-        </div>
-        <h1>Agentic Report Generator</h1>
-        <p>Transform your CSV data into comprehensive analytical reports</p>
-      </div>
-
-      <div className="workflow-steps">
-        <div
-          className={`workflow-step ${parsedData ? 'workflow-step--completed' : 'workflow-step--active'}`}
-        >
-          <div className="step-number">1</div>
-          <div className="step-content">
-            <h3>Upload CSV</h3>
-            <p>Select your data file</p>
+    <div className="max-w-[1280px] mx-auto px-6 py-8">
+      {/* Header */}
+      <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-8">
+        <div className="flex items-center gap-4">
+          <div className="bg-primary p-2 rounded-lg text-white">
+            <span className="material-symbols-outlined block text-3xl">auto_awesome</span>
+          </div>
+          <div>
+            <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+              Agentic Report Generator
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 text-lg">
+              Transform your CSV data into comprehensive analytical reports
+            </p>
           </div>
         </div>
+      </header>
 
-        <div className="workflow-arrow">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <polyline
-              points="9,18 15,12 9,6"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-          </svg>
-        </div>
-
-        <div
-          className={`workflow-step ${htmlReport ? 'workflow-step--completed' : parsedData ? 'workflow-step--active' : ''}`}
-        >
-          <div className="step-number">2</div>
-          <div className="step-content">
-            <h3>Generate Report</h3>
-            <p>Process and analyze</p>
+      {/* Workflow columns */}
+      <main className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        {/* Column 1: Upload */}
+        <section className="flex flex-col gap-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span
+              className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+                parsedData
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-primary text-white'
+              }`}
+            >
+              {parsedData ? '✓' : '1'}
+            </span>
+            <h2 className="text-lg font-bold uppercase tracking-wider text-slate-500">
+              Upload Data
+            </h2>
           </div>
-        </div>
-
-        <div className="workflow-arrow">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <polyline
-              points="9,18 15,12 9,6"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-          </svg>
-        </div>
-
-        <div
-          className={`workflow-step ${htmlReport ? 'workflow-step--active' : ''}`}
-        >
-          <div className="step-number">3</div>
-          <div className="step-content">
-            <h3>Download Report</h3>
-            <p>Get your HTML report</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="components-grid">
-        <div className="component-wrapper">
           <CSVUpload onUpload={handleCSVUpload} />
-        </div>
+        </section>
 
-        <div className="component-wrapper">
+        {/* Column 2: Generate */}
+        <section className="flex flex-col gap-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span
+              className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+                htmlReport
+                  ? 'bg-emerald-500 text-white'
+                  : parsedData
+                    ? 'bg-primary text-white'
+                    : 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+              }`}
+            >
+              {htmlReport ? '✓' : '2'}
+            </span>
+            <h2 className="text-lg font-bold uppercase tracking-wider text-slate-500">
+              Analyze & Generate
+            </h2>
+          </div>
           <ReportGenerator
             parsedData={parsedData}
             fileName={fileName}
             onReportGenerated={handleReportGenerated}
           />
-        </div>
+        </section>
 
-        <div className="component-wrapper">
+        {/* Column 3: Export */}
+        <section className="flex flex-col gap-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span
+              className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+                htmlReport
+                  ? 'bg-primary text-white'
+                  : 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+              }`}
+            >
+              3
+            </span>
+            <h2 className="text-lg font-bold uppercase tracking-wider text-slate-500">
+              Export Report
+            </h2>
+          </div>
           <HTMLDownloader htmlContent={htmlReport} fileName={fileName} />
-        </div>
-      </div>
+        </section>
+      </main>
 
-      <div className="app-footer">
-        <p>© 2025 Agentic Report Generator.</p>
-      </div>
+      {/* Footer */}
+      <footer className="mt-12 p-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-wrap justify-between items-center gap-6">
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col">
+            <span className="text-xs uppercase font-bold text-slate-500 tracking-wider">
+              System Status
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-sm font-bold">Operational</span>
+            </div>
+          </div>
+          <div className="w-px h-8 bg-slate-200 dark:bg-slate-800 hidden sm:block" />
+          <div className="flex flex-col">
+            <span className="text-xs uppercase font-bold text-slate-500 tracking-wider">
+              Engine
+            </span>
+            <span className="text-sm font-bold">Qwen 2.5 Coder 32B</span>
+          </div>
+        </div>
+        <div className="text-sm text-slate-500">
+          Agentic Report Generator. All processing is private.
+        </div>
+      </footer>
     </div>
   );
 };

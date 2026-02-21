@@ -1,103 +1,48 @@
-You are an expert data analyst tasked with creating a comprehensive report blueprint. Based on the provided CSV headers and sample data rows, analyze the data structure and provide a detailed blueprint for generating an analytical report.
+You are a data analyst. You will receive the column headers and 5 sample rows from a CSV dataset. Your job is to:
 
-**ANALYSIS REQUIREMENTS:**
+1. Understand the dataset structure
+2. Create a report blueprint
+3. Write SQL queries that will be executed against the FULL dataset to compute the exact numbers needed for the report
 
-1. **DATA STRUCTURE ANALYSIS**
-   - Identify data types for each column (numeric, categorical, date/time, text, boolean)
-   - Determine key identifiers and primary metrics
-   - Identify relationships between columns
-   - Assess data quality and completeness
+The table is named `data`. All columns are text type — use CAST() for numeric operations.
 
-2. **REPORT SECTIONS TO GENERATE**
-   Based on the sample data provided, suggest specific report sections that would be valuable:
-   - Executive Summary components
-   - Performance metrics and KPIs
-   - Trend analysis opportunities
-   - Categorical breakdowns
-   - Geographic or location-based analysis (if applicable)
-   - Time-based analysis (if date columns exist)
-   - Comparative analysis sections
-   - Risk or anomaly detection areas
+RESPOND IN EXACTLY THIS FORMAT:
 
-3. **CALCULATIONS AND METRICS**
-   For each identified section, specify:
-   - Count aggregations (total records, unique values)
-   - Sum/average calculations for numeric fields
-   - Percentage distributions for categorical data
-   - Growth rates or trends (if time data exists)
-   - Success/failure rates (if status fields exist)
-   - Statistical measures (mean, median, mode, standard deviation)
-   - Cross-tabulation opportunities
+## BLUEPRINT
 
-4. **VISUALIZATIONS RECOMMENDATIONS**
-   Suggest appropriate chart types:
-   - Tables for detailed breakdowns
-   - Bar charts for categorical comparisons
-   - Line charts for trends over time
-   - Pie charts for distribution analysis
-   - Scatter plots for correlation analysis
-   - Heatmaps for multi-dimensional data
+1. DATA OVERVIEW — What this dataset is about, key columns
+2. KPI SELECTION — 4-6 key metrics to highlight (describe what each query below computes)
+3. REPORT SECTIONS — 3-5 sections to include (e.g. top performers, category breakdown, distributions)
+4. KEY QUESTIONS — What business questions will the report answer
 
-5. **KEY INSIGHTS POTENTIAL**
-   Identify what business insights could be derived:
-   - Performance patterns
-   - Bottlenecks or issues
-   - Success factors
-   - Regional/categorical differences
-   - Temporal patterns
-   - Operational efficiency metrics
+## SQL_QUERIES
 
-**OUTPUT FORMAT:**
-Provide a structured blueprint in the following format:
+Write 6-12 SQL queries that will extract the data needed for the report. Each query in its own ```sql block.
 
-```
-REPORT BLUEPRINT ANALYSIS
-========================
+Guidelines for SQL:
+- Table name is `data` — always use `FROM data`
+- Columns are strings — cast to number with CAST(column AS NUMBER) or CONVERT(column, NUMBER) for math
+- Use standard SQL: SELECT, COUNT, SUM, AVG, MIN, MAX, GROUP BY, ORDER BY, LIMIT
+- Each query should serve a specific purpose for the report (KPIs, breakdowns, top-N, distributions)
+- Add a comment at the top of each query explaining what it computes
+- Keep queries simple and reliable — no CTEs, no window functions
 
-DATA OVERVIEW:
-- Total Columns: [X]
-- Key Metrics: [list primary numeric/performance columns]
-- Categorical Dimensions: [list grouping columns]
-- Time Dimensions: [list date/time columns if any]
-- Identifier Fields: [list ID/reference columns]
-
-RECOMMENDED REPORT SECTIONS:
-
-1. EXECUTIVE SUMMARY
-   - Overall statistics: [specific metrics to calculate]
-   - Success rates: [how to calculate if applicable]
-   - Key performance indicators: [list specific KPIs]
-
-2. [SECTION NAME]
-   - Purpose: [what this section analyzes]
-   - Calculations: [specific formulas/aggregations]
-   - Visualizations: [recommended chart types]
-
-[Continue for all identified sections...]
-
-DETAILED CALCULATIONS:
-
-For [Column Name]:
-- Count of unique values
-- Distribution analysis
-- [other specific calculations]
-
-For [Numeric Column]:
-- Sum, Average, Min, Max
-- Percentage calculations
-- [other statistical measures]
-
-CROSS-ANALYSIS OPPORTUNITIES:
-- [Column A] vs [Column B]: [type of analysis]
-- [Time trend analysis if applicable]
-- [Geographic analysis if applicable]
-
-INSIGHTS TO EXTRACT:
-- [Specific business questions this data can answer]
-- [Performance trends to highlight]
-- [Operational insights to include]
+Example:
+```sql
+-- Total number of records
+SELECT COUNT(*) as total_records FROM data
 ```
 
-Now analyze the following CSV data and provide the blueprint:
+```sql
+-- Average order value
+SELECT ROUND(AVG(CAST(amount AS NUMBER)), 2) as avg_amount FROM data
+```
 
-**CSV HEADERS AND SAMPLE DATA:**
+```sql
+-- Sales by category
+SELECT category, COUNT(*) as count, SUM(CAST(amount AS NUMBER)) as total FROM data GROUP BY category ORDER BY total DESC
+```
+
+Now analyze this data and provide the blueprint + SQL queries:
+
+**DATA (headers + 5 sample rows):**

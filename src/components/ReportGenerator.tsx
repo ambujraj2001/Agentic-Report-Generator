@@ -1,8 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import Papa from 'papaparse';
 import {
-  generateBluePrintForReport,
-  generateChunkSummary,
+  generateBlueprintAndQueries,
+  executeQueries,
   generateReport,
 } from './util';
 
@@ -30,96 +30,33 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     setIsGenerated(false);
 
     try {
-      // Calculate chunks
-      const chunkSize = 10;
-      const mainDataChunks: Record<string, string>[][] = [];
-      for (let i = 0; i < parsedData.data.length; i += chunkSize) {
-        mainDataChunks.push(parsedData.data.slice(i, i + chunkSize));
-      }
+      setCurrentStep('Analyzing schema and planning queries...');
+      setProgress(10);
+      const { blueprint, queries } =
+        await generateBlueprintAndQueries(parsedData.data);
 
-      const totalAPICalls = mainDataChunks.length + 1; // +1 for final report
-      const callsPerStep = 2;
-      let completedCalls = 0;
-
-      // Dynamic step messages based on actual processing
-      const dynamicSteps = [
-        'Loading data and initializing...',
-        'Reviewing dataset structure...',
-        'Extracting key insights...',
-        'Building executive dashboard...',
-        'Designing visual charts and metrics...',
-        'Processing data chunks...',
-        'Analyzing patterns and trends...',
-        'Finalizing report layout...',
-        'Applying professional styling...',
-        'Wrapping up and preparing download...',
-      ];
-
-      // Function to get current step message
-      const getCurrentStepMessage = (
-        completedCalls: number,
-        totalCalls: number
-      ) => {
-        const stepIndex = Math.floor(
-          (completedCalls / totalCalls) * dynamicSteps.length
-        );
-        return dynamicSteps[Math.min(stepIndex, dynamicSteps.length - 1)];
-      };
-
-      // Update progress function
-      const updateProgress = () => {
-        const overallProgress = (completedCalls / totalAPICalls) * 100;
-        setProgress(overallProgress);
-        setCurrentStep(getCurrentStepMessage(completedCalls, totalAPICalls));
-      };
-
-      // Initial step
-      updateProgress();
-
-      // Generate blueprint
-      const reportBlueprint = await generateBluePrintForReport(
-        parsedData.data.slice(0, 5)
+      setCurrentStep(
+        `Running ${queries.length} SQL queries on full dataset...`
       );
-      completedCalls++;
-      updateProgress();
+      setProgress(40);
+      const queryResults = executeQueries(parsedData.data, queries);
 
-      // Process chunks in batches to show progress every 2 calls
-      const chunkSummaries: string[] = [];
+      setCurrentStep('Building HTML report from query results...');
+      setProgress(60);
+      const htmlReport = await generateReport(blueprint, queryResults);
 
-      for (let i = 0; i < mainDataChunks.length; i++) {
-        const chunkSummary = await generateChunkSummary(
-          mainDataChunks[i],
-          reportBlueprint
-        );
-        chunkSummaries.push(chunkSummary);
-        completedCalls++;
-        updateProgress();
-
-        // Show progress every 2 completed calls or at the end
-        if (
-          completedCalls % callsPerStep === 0 ||
-          i === mainDataChunks.length - 1
-        ) {
-          await new Promise((resolve) => setTimeout(resolve, 300)); // Brief pause to show progress
-        }
-      }
-
-      // Final report generation
-      setCurrentStep('Generating final comprehensive report...');
-      const htmlReport = await generateReport(chunkSummaries, reportBlueprint);
-      completedCalls++;
       setProgress(99);
       setCurrentStep('Report generated successfully!');
-
       onReportGenerated(htmlReport);
     } catch (error) {
-      console.error('❌ Report generation failed:', error);
+      console.error('Report generation failed:', error);
       setCurrentStep('Error occurred during report generation');
     }
 
     setIsGenerating(false);
     setIsGenerated(true);
   }, [onReportGenerated, parsedData]);
+
   const progressBarStyle = useMemo(
     () => ({
       width: `${progress}%`,
@@ -133,127 +70,95 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   }, [parsedData, isGenerating]);
 
   return (
-    <div className="report-generator-container">
-      <div className="report-generator-header">
-        <div className="report-generator-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <rect
-              x="3"
-              y="4"
-              width="18"
-              height="18"
-              rx="2"
-              ry="2"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-            <line
-              x1="16"
-              y1="2"
-              x2="16"
-              y2="6"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-            <line
-              x1="8"
-              y1="2"
-              x2="8"
-              y2="6"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-            <line
-              x1="3"
-              y1="10"
-              x2="21"
-              y2="10"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-            <path d="m9 16 2 2 4-4" stroke="currentColor" strokeWidth="2" />
-          </svg>
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm min-h-[400px] flex flex-col">
+      {/* Stats rows */}
+      <div className="space-y-4 mb-8">
+        <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800">
+          <span className="text-slate-500 dark:text-slate-400 text-sm">Source File</span>
+          <span className="font-semibold text-sm">
+            {fileName || '—'}
+          </span>
         </div>
-        <h2>Generate Report</h2>
-        <p>Create comprehensive analytics from your data</p>
+        <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800">
+          <span className="text-slate-500 dark:text-slate-400 text-sm">Data Size</span>
+          <span className="font-semibold text-sm">
+            {parsedData ? `${parsedData.data.length} records` : '—'}
+          </span>
+        </div>
+        <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800">
+          <span className="text-slate-500 dark:text-slate-400 text-sm">Status</span>
+          <span
+            className={`text-sm font-semibold ${
+              isGenerated
+                ? 'text-emerald-500'
+                : parsedData
+                  ? 'text-primary'
+                  : 'text-slate-400'
+            }`}
+          >
+            {isGenerated
+              ? 'Generated'
+              : parsedData
+                ? 'Ready for processing'
+                : 'Waiting for data'}
+          </span>
+        </div>
       </div>
 
-      {parsedData && (
-        <div className="report-info">
-          <div className="report-info-item">
-            <span className="report-info-label">Source File:</span>
-            <span className="report-info-value">{fileName}</span>
-          </div>
-          <div className="report-info-item">
-            <span className="report-info-label">Data Size:</span>
-            <span className="report-info-value">
-              {parsedData?.data.length || 0} records
-            </span>
-          </div>
-          <div className="report-info-item">
-            <span className="report-info-label">Status:</span>
-            <span
-              className={`report-status ${isGenerated ? 'report-status--success' : 'report-status--ready'}`}
-            >
-              {isGenerated ? 'Generated' : 'Ready for processing'}
-            </span>
-          </div>
-        </div>
-      )}
-
+      {/* Progress */}
       {isGenerating && (
-        <div className="progress-container">
-          <div className="progress-header">
-            <span className="progress-step">{currentStep}</span>
-            <span className="progress-percentage">{Math.round(progress)}%</span>
+        <div className="bg-slate-100 dark:bg-slate-800/50 p-6 rounded-lg mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <p className="text-sm font-bold text-primary">{currentStep}</p>
+            <span className="text-sm font-bold text-slate-400">
+              {Math.round(progress)}%
+            </span>
           </div>
-          <div className="progress-bar">
-            <div className="progress-fill" style={progressBarStyle}></div>
+          <div className="w-full bg-slate-200 dark:bg-slate-700 h-3 rounded-full overflow-hidden">
+            <div
+              className="bg-primary h-full rounded-full progress-bar-animated shadow-[0_0_10px_rgba(13,166,242,0.4)]"
+              style={progressBarStyle}
+            />
           </div>
+          <p className="mt-4 text-xs text-slate-500 dark:text-slate-400 leading-relaxed italic">
+            Agent is analyzing your dataset and building the report...
+          </p>
         </div>
       )}
 
-      <button
-        onClick={handleGenerate}
-        disabled={!canGenerate}
-        className={`generate-button ${!canGenerate ? 'generate-button--disabled' : ''}`}
-      >
-        {isGenerating ? (
-          <>
-            <div className="button-spinner"></div>
-            Generating Report...
-          </>
-        ) : isGenerated ? (
-          <>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-              <polyline
-                points="9,12 12,15 16,10"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-            </svg>
-            Report Generated
-          </>
-        ) : (
-          <>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <polygon
-                points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-            </svg>
-            Generate Report
-          </>
-        )}
-      </button>
+      {/* Button */}
+      <div className="mt-auto">
+        <button
+          onClick={handleGenerate}
+          disabled={!canGenerate}
+          className={`w-full flex items-center justify-center gap-3 px-4 py-4 rounded-lg text-base font-bold transition-all ${
+            isGenerating
+              ? 'bg-primary/20 text-primary border border-primary/30 cursor-not-allowed'
+              : !canGenerate
+                ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
+                : isGenerated
+                  ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                  : 'bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/25'
+          }`}
+        >
+          {isGenerating ? (
+            <>
+              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              Generating Report...
+            </>
+          ) : isGenerated ? (
+            <>
+              <span className="material-symbols-outlined text-xl">check_circle</span>
+              Report Generated
+            </>
+          ) : (
+            <>
+              <span className="material-symbols-outlined text-xl">bolt</span>
+              Generate Report
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 };
